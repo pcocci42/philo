@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pcocci <pcocci@student.42firenze.it>       +#+  +:+       +#+        */
+/*   By: pcocci <pcocci@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 10:58:13 by pcocci            #+#    #+#             */
-/*   Updated: 2023/02/28 11:33:06 by pcocci           ###   ########.fr       */
+/*   Updated: 2023/02/28 14:13:40 by pcocci           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,10 @@ typedef struct s_philo {
 
     int             nome;
     pthread_t       philosophers;
-    pthread_mutex_t forks;
+    pthread_mutex_t forkr;
+    pthread_mutex_t *forkl;
     struct s_info    *info;
+    int             last_meal;
 }   t_philo;
 
 typedef struct s_info {

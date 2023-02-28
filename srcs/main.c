@@ -3,32 +3,48 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pcocci <pcocci@student.42firenze.it>       +#+  +:+       +#+        */
+/*   By: pcocci <pcocci@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 10:58:09 by pcocci            #+#    #+#             */
-/*   Updated: 2023/02/28 11:33:11 by pcocci           ###   ########.fr       */
+/*   Updated: 2023/02/28 14:14:42 by pcocci           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
 
 
-int get_time(t_info tv)
+int get_time(struct timeval start)
 {
-    int time;
-    struct timeval tv2;
-
-    time = tv.tv.tv_sec * 1000000 + tv.tv.tv_usec;
-    return ((tv2.tv_sec * 1000000 + tv2.tv_usec - time)/ 1000);
+    struct timeval stop;
+    
+    gettimeofday(&stop, NULL);
+    return (((stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec)/1000);
+    
 }
 
 void    *routine(void *arg)
 {   
     t_philo *philo;
     philo = (t_philo *)arg;
-    //pthread_mutex_lock(&(info->philo->forks[]));
-    printf("Hi i'm %d\n", philo->nome);
-    //pthread_mutex_unlock(&(info->philo->forks[info->i]));
+    int     forkr;
+    int     forkl; 
+
+    while (1)
+    {
+    printf("%dms %d is thinking\n", get_time(philo->info->tv),philo->nome);
+    pthread_mutex_lock(&philo->forkr);
+    printf("%dms %d has taken a fork right\n", get_time(philo->info->tv), philo->nome);
+    pthread_mutex_lock(philo->forkl);
+    printf("%dms %d has taken a fork left\n", get_time(philo->info->tv), philo->nome);
+    philo->last_meal = get_time(philo->info->tv);
+    printf("%dms %d is eating\n", get_time(philo->info->tv), philo->nome);
+    usleep(philo->info->time_to_eat * 1000);
+    pthread_mutex_unlock(&philo->forkr);
+    pthread_mutex_unlock(philo->forkl);
+    printf("%dms %d is sleeping\n", get_time(philo->info->tv), philo->nome);
+    usleep(philo->info->time_to_sleep * 1000);
+
+    }
     return(arg);
 }
 
@@ -71,17 +87,18 @@ int main(int ac, char **av)
 {   
     t_info          info;
     int i = 0;
+    gettimeofday(&info.tv, NULL);
     info.philo = malloc(sizeof(t_philo) * ft_atoi(av[1]));
     if (ac == 5 || ac == 6)
     {   
-        gettimeofday(&info.tv, NULL);
         info.number_of_philosophers = ft_atoi(av[1]);
-        /* info.philo->philosophers = malloc(sizeof(pthread_t) * info.number_of_philosophers);
-        info.philo->forks = malloc(sizeof(pthread_mutex_t) * info.number_of_philosophers); */
-        
         while (i < info.number_of_philosophers)
         {
-            pthread_mutex_init(&info.philo[i].forks, NULL);
+            pthread_mutex_init(&info.philo[i].forkr, NULL);
+            if (i == info.number_of_philosophers - 1)
+                info.philo[i].forkl = &info.philo[0].forkr;
+            else
+                info.philo[i].forkl = &info.philo[i + 1].forkr;
             i++;
         }
         i = 0;
@@ -98,11 +115,11 @@ int main(int ac, char **av)
 
         new_philos(info);
         i = 0;
-        while (i < info.number_of_philosophers)
+        /* while (i < info.number_of_philosophers)
         {
-            pthread_mutex_destroy(&info.philo[i].forks);
+            pthread_mutex_destroy(&info.forks[i]);
             i++;
-        }
+        } */
 
     }
     return (0);
