@@ -6,7 +6,7 @@
 /*   By: pcocci <pcocci@student.42firenze.it>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 10:58:13 by pcocci            #+#    #+#             */
-/*   Updated: 2023/02/27 16:39:39 by pcocci           ###   ########.fr       */
+/*   Updated: 2023/02/28 11:33:06 by pcocci           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@
 
 typedef struct s_philo {
 
-    int             *nome;
-    pthread_t       *philosophers;
-    pthread_mutex_t *forks;
-    
+    int             nome;
+    pthread_t       philosophers;
+    pthread_mutex_t forks;
+    struct s_info    *info;
 }   t_philo;
 
 typedef struct s_info {
@@ -36,7 +36,6 @@ typedef struct s_info {
     int time_to_sleep;
     int number_of_times_each_philosopher_must_eat;
     int last_meal;
-    int i;
     struct  timeval tv;
 
 }   t_info;
