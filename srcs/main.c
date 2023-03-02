@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pcocci <pcocci@student.42.fr>              +#+  +:+       +#+        */
+/*   By: pcocci <pcocci@student.42firenze.it>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 10:58:09 by pcocci            #+#    #+#             */
-/*   Updated: 2023/02/28 14:21:52 by pcocci           ###   ########.fr       */
+/*   Updated: 2023/03/02 14:25:45 by pcocci           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,38 @@ int get_time(struct timeval start)
     
 }
 
+void    *check_death(void *arg)
+{
+    t_info  *info;
+    int     i;
+
+    info = (t_info *)arg;
+    while (!info->death)
+    {
+        i = -1;
+        while (++i < info->number_of_philosophers)
+        {
+            if (info->philo->last_meal + info->time_to_die < get_time(info->tv))
+            {
+                info->death++;
+                if(info->death == 1)
+                    printf("%dms %d has died\n", get_time(info->tv), i + 1);
+            }
+        }
+    }
+    i = -1;
+    while (++i < info->number_of_philosophers)
+    {
+        pthread_detach(info->philo[i].philosophers);
+    }
+    return (NULL);
+}
+
 void    *routine(void *arg)
 {   
     t_philo *philo;
     philo = (t_philo *)arg;
-    int     forkr;
-    int     forkl; 
-
+    
     while (1)
     {
     printf("%dms %d is thinking\n", get_time(philo->info->tv),philo->nome);
@@ -43,9 +68,8 @@ void    *routine(void *arg)
     pthread_mutex_unlock(philo->forkl);
     printf("%dms %d is sleeping\n", get_time(philo->info->tv), philo->nome);
     usleep(philo->info->time_to_sleep * 1000);
-
     }
-    return(arg);
+    return(NULL);
 }
 
 
@@ -60,25 +84,22 @@ void    new_philos(t_info info)
     j = 0;
     while (i < nb)
     {   
-        info.philo[i].nome = i + 1;
-        if (pthread_create(&info.philo[i].philosophers, NULL, &routine, &info.philo[i]) != 0)
-            printf("error");
+        pthread_create(&info.philo[i].philosophers, NULL, &routine, &info.philo[i]);
         usleep(1);
         i += 2;
     }
     i = 1;
     while (i < nb)
     {
-        info.philo[i].nome = i + 1;
-        if (pthread_create(&info.philo[i].philosophers, NULL, &routine, &info.philo[i]) != 0)
-            printf("error");
+        pthread_create(&info.philo[i].philosophers, NULL, &routine, &info.philo[i]);
         usleep(1);
         i += 2;
     }
+    pthread_create(&info.ghost_reaper, NULL, &check_death, &info);
+    pthread_join(info.ghost_reaper, NULL);
     while (j < nb)
     {   
-        if (pthread_join(info.philo[j].philosophers, NULL) != 0)
-            printf("error");
+        pthread_join(info.philo[j].philosophers, NULL);
         j++;
     }
 }
@@ -92,6 +113,7 @@ int main(int ac, char **av)
     if (ac == 5 || ac == 6)
     {   
         info.number_of_philosophers = ft_atoi(av[1]);
+        info.number_of_times_each_philosopher_must_eat = -1;
         while (i < info.number_of_philosophers)
         {
             pthread_mutex_init(&info.philo[i].forkr, NULL);
@@ -99,6 +121,9 @@ int main(int ac, char **av)
                 info.philo[i].forkl = &info.philo[0].forkr;
             else
                 info.philo[i].forkl = &info.philo[i + 1].forkr;
+            info.philo[i].last_meal = 0;
+            info.philo[i].info = &info;
+            info.philo[i].nome = i + 1;
             i++;
         }
         i = 0;
@@ -110,17 +135,13 @@ int main(int ac, char **av)
         info.time_to_die = ft_atoi(av[2]);
         info.time_to_eat = ft_atoi(av[3]);
         info.time_to_sleep = ft_atoi(av[4]);
+        info.death = 0;
         if (ac == 6)
             info.number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
 
         new_philos(info);
-        i = 0;
-        /* while (i < info.number_of_philosophers)
-        {
-            pthread_mutex_destroy(&info.forks[i]);
-            i++;
-        } */
-
+        free(info.philo);
+        
     }
     return (0);
 }

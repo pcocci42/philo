@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pcocci <pcocci@student.42.fr>              +#+  +:+       +#+        */
+/*   By: pcocci <pcocci@student.42firenze.it>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 10:58:13 by pcocci            #+#    #+#             */
-/*   Updated: 2023/02/28 14:13:40 by pcocci           ###   ########.fr       */
+/*   Updated: 2023/03/02 12:27:07 by pcocci           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,14 +31,15 @@ typedef struct s_philo {
 
 typedef struct s_info {
 
-    t_philo *philo;
-    int number_of_philosophers;
-    int time_to_die;
-    int time_to_eat;
-    int time_to_sleep;
-    int number_of_times_each_philosopher_must_eat;
-    int last_meal;
-    struct  timeval tv;
+    t_philo         *philo;
+    pthread_t       ghost_reaper;
+    int             number_of_philosophers; 
+    int             time_to_die;
+    int             time_to_eat;
+    int             time_to_sleep;
+    int             number_of_times_each_philosopher_must_eat;
+    struct timeval  tv;
+    int             death;
 
 }   t_info;
 
