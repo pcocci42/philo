@@ -6,7 +6,7 @@
 /*   By: pcocci <pcocci@student.42firenze.it>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 10:58:13 by pcocci            #+#    #+#             */
-/*   Updated: 2023/03/02 12:27:07 by pcocci           ###   ########.fr       */
+/*   Updated: 2023/03/06 13:45:26 by pcocci           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ typedef struct s_philo {
     pthread_mutex_t *forkl;
     struct s_info    *info;
     int             last_meal;
+    int             meals;
 }   t_philo;
 
 typedef struct s_info {
